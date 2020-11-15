@@ -35,6 +35,7 @@ Design Lift(LLD)
 	LiftStatus status
 	LiftWeightStatus weightStatus
 	int weightLimit //in Kgs.
+	List<int> floors
 	
 	LiftStatus:
 	-----------
