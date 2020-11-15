@@ -1,0 +1,107 @@
+Design Lift(LLD)
+
+1.Problem statement:(my understanding/thinking)
+	Design a lift system.
+	A person can land to any floor and can input whether to go top or down.
+	Lift system should send the lift to that floor. That lift should be optimistic one(Non fully loaded lift which can reach that floor in short time)
+	Once lift system found the lift, it should display lift number to users floor so that user can go to respective lift to board.
+	Once lift arrives, user can board the lift and user should input users floor.
+	Now lift should check whether weight inside lift should not cross boundary limit.
+	In that case, give signal.
+	Once all cases met after few seconds, lift should close the door and start the bus.
+	Lift has list of floor numbers to stop.Based on the floor numbers lift should stop and do its routine process.
+	
+
+2.Identifying classes:
+	LiftSystem
+	Lift
+	FloorPanel
+	
+	LiftStatus
+	LiftWeightStatus
+	
+3.Identifying Relationship:
+	
+	Person -- FloorPanel -- LiftSystem
+	|							|	
+	|							|
+	------------Lift-------------
+		
+4.Identifying properties:
+	
+	Lift
+	-----
+	int LiftNo
+	LiftStatus status
+	LiftWeightStatus weightStatus
+	int weightLimit //in Kgs.
+	
+	LiftStatus:
+	-----------
+	IDLE
+	MOVING
+	OUT_OF_ORDER
+	
+	LiftWeightStatus
+	----------------
+	FULL
+	EMPTY
+	HAS_SPACE
+
+	LiftSystem
+	----------
+	List<Lift> //we can change this to optimistic data structure later like HashMaps...etc
+	
+	FloorPanel
+	-----------
+	int floorNo
+	LiftSystem liftSystemRef 	//Reference to lift system to give input to lift system.
+	DiplayUnit displayUnit 		//Once floor panel gets list of lift. print those lift numbers to display unit.
+	
+5.Identify funtions:
+
+	interface UserInterface	//Exposed to users inside lift
+	--------------------------
+	setFloorInput();
+	OpenDoor();
+	CloseDoor();
+	
+	interface SystemInterface
+	--------------------------
+	LiftStatus getLiftStatus()
+	LiftWeightStatus getWeightStatus()
+	setFloorInput(int floorNo);
+	stopLift();
+	
+	
+	class Lift implements UserInterface, SystemInterface
+	----------------------------------------------
+	public:
+		Lift(int liftNo,weightLimit)	//constructor
+		setFloorInput(int floorNo) 	//This is exposed to users in lift through UserInterface,SystemInterface
+		LiftStatus getLiftStatus()	//This is exposed to Lift system through SystemInterface
+		LiftWeightStatus getWeightStatus()	//This is exposed to Lift system through SystemInterface
+		void OpenDoor();
+		void CloseDoor();
+		void stopLift();	//in case of any emergency, lift system will signal to stop the lifts
+		
+	
+	interface LiftFloorInterface
+	------------------------------
+	public List<Lift> getLift(int floorNo);
+	
+	interface LiftSystemInterface
+	-----------------------------
+	public List<Lift> getLift(int floorNo);
+	void stopLifts()	//inputs from admins in case to stop the lifts.
+	
+	class LiftSystem	implements LiftSystemInterface,LiftFloorInterface
+	--------------------------------------------------------------
+	public LiftSystem(List<Lift>)	//constructor
+	public List<Lift> getLift(int floorNo);	//This method will get status of all lifts and calculates optimistic lift and signals lift to go to respective floor.
+	void stopLifts()
+	
+	class FloorPanel
+	----------------
+	List<Lift> getLifts();
+	void DisplayLifts(List<Lift>) // this method to print next arriving lifts in any display panel for user to know.
