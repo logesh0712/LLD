@@ -23,9 +23,9 @@ Design Lift(LLD)
 3.Identifying Relationship:
 	
 	Person -- FloorPanel -- LiftSystem
-	|							|	
-	|							|
-	------------Lift-------------
+	|				|	
+	|				|
+	------------Lift-----------------
 		
 4.Identifying properties:
 	
