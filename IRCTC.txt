@@ -1,0 +1,162 @@
+IRCTC low level design:
+
+1.Problem Statement:
+    Login:
+        A user will login to irctc system.
+    Search Train:
+        A user will search trains based on from and to location,date. Our system should provide him list of available trains.
+    Book train ticket:
+        A user can select a train , Coach(AC,NON AC) & seat type(lower, middle, upper breath) & no.of seats to book.
+        System calculates the amount needed for users requirement and allows user to do payment.
+    Payment:
+        Payment can be made using multiple ways(Net banking, card, irctc wallet)
+        Discount on payments also should be integrated.
+        Once after payment is done,ticket should be generated.
+    Notification:
+        Created ticket should be notified to user in different ways.(sms, email, whatsapp)
+    Train status check:
+        If the train is in processing, its status should be shown to users.
+    Modification of ticket:
+    Cancellation of ticket:
+
+2.Identification of class:(For case of simplicity classes which are relevent to this subject is taken)
+    User
+    Irctc System
+    Train
+    Coach
+    Seat
+    Payment
+    Notification
+    TrainStatus
+    Ticket
+
+    CoachType       (AC,NON_AC,CHAIR)
+    SeatType        (LOWER,MIDDLE,UPPER)
+    NotificationType(SMS,EMAIL,WHATSAPP)
+    TrainStatus     (RUNNING,IDLE,REPAIR)
+
+3.Identifying Relation:
+
+     -------Payment
+     |        |  
+    User -- IRCTC  --- TrainStatus
+     |        |    --- Notification 
+     |------Train
+              |  
+            Coach
+              |  
+            Seat
+
+4.Identification of properties for classes:
+    User:
+        id 
+        name 
+        email
+        PhoneNumber
+
+    Train:
+        trainNo
+        trainName 
+        List<Coach> //We can come up later with better data structure.
+        status 
+        JourneyDetails //Association type of this class is Aggregation(Not tightly associated)
+        TrainType       //Goods,passenger..etc
+
+    JourneyDetails
+        List<Station>
+        Date
+        int kms
+
+    Station
+        stationId
+        stationName
+        Address
+        StationStatus
+    
+    StationStatus
+        ARRIVED
+        NOTARRIVED
+        CROSSED
+        
+    Coach
+        coachId
+        coachName
+        CoachType
+        List<Seat> 
+        price
+
+    ACCoach : Coach
+        AC
+        FAN
+
+        ACCoach(List<Seat> seats,int price,CoacType_AC) : Base(seats,price)
+
+    NONAcCoach : Coach
+        FAN
+        //other relevent facilities
+    
+    NormalCoach : Coach
+        //Relevent facility
+
+    Seat
+        seatNo
+        SeatType
+        SeatStatus
+
+    SeatStatus
+        EMPTY
+        BOOKED
+
+    IrctcSystem
+        List<Train>         //we can use hashmap or other better data structures too.
+        Payment paymentRef
+        Notification notificationRef
+
+    Ticket
+        int ticketNo
+        JourneyDetails //This has date,kms
+        List<Seat> seatDetails
+        Coach coachDetails
+        int no.of.total.seats
+        double ruppes
+        string description
+
+    Notification
+        NotificationType
+        Ticket  //Ticket and below details are loosly associated.
+        User    //This has email,PhoneNumber
+
+    SMSNOtification : Notification
+        SMSNotification(): Super(NotificationType_SMS)
+
+    EmailNotification : Notification
+        EmailNotification() : Super(NotificationType_EMAIL)
+
+
+5.Identifying funciontality:
+    TrainInterface:
+        string getTrainName()
+        JourneyDetails getTrainJourneyDetails()
+        List<Seat> getAvailableSeats(CoachType coachType=null, SeatType seatType=null)
+        List<Seat> getSeatStatus(CoachType coachType=null, SeatType seatType=null)
+
+    Train implements TrainInterface
+    {
+
+    }
+
+
+    IrctcIterface:
+        List<Train> SearchTrain(string from=null, string to=null, Date = null,int trainNo = 0, int trianName);
+        Ticket BookTicket(Train);
+        Receipt CancelTicket(Train); //Receipt class we need to implement
+        Ticket ModifyTicket(Train oldTrainDetails,Train newTrainDetails)
+        Receipt DoPayment();
+        TrainStatus getTrainStatus(TrainNo,trainName,Date);
+
+    IrctcImpl implements IrctcInterface
+    {
+        //implements all methods
+
+        private bool notifyUser(userDetails);
+    }    
