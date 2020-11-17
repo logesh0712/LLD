@@ -58,7 +58,7 @@ IRCTC low level design:
         trainNo
         trainName 
         List<Coach> //We can come up later with better data structure.
-        status 
+        Trainstatus //RUNNING,IDLE,REPAIR..etc
         JourneyDetails //Association type of this class is Aggregation(Not tightly associated)
         TrainType       //Goods,passenger..etc
 
@@ -83,7 +83,7 @@ IRCTC low level design:
         coachName
         CoachType
         List<Seat> 
-        price
+        price       //Price is decided based on coach selected.
 
     ACCoach : Coach
         AC
@@ -132,8 +132,18 @@ IRCTC low level design:
     EmailNotification : Notification
         EmailNotification() : Super(NotificationType_EMAIL)
 
-
-5.Identifying funciontality:
+    Payment:
+        PaymentType
+            
+    CardPayment : Payment
+    {
+        List<BankDetails>
+        CardPayment():Super(PaymentType)
+    }
+    WalletPayment: Payment
+    CreditCardPayment:Payment
+    
+5.Identifying funciontality: //Added functionality for Train & IRCTC system. Trian has components of coach and seat details.
     TrainInterface:
         string getTrainName()
         JourneyDetails getTrainJourneyDetails()
@@ -142,16 +152,16 @@ IRCTC low level design:
 
     Train implements TrainInterface
     {
-
+        //All the methods in interface should be implemented.
     }
 
 
-    IrctcIterface:
-        List<Train> SearchTrain(string from=null, string to=null, Date = null,int trainNo = 0, int trianName);
-        Ticket BookTicket(Train);
-        Receipt CancelTicket(Train); //Receipt class we need to implement
-        Ticket ModifyTicket(Train oldTrainDetails,Train newTrainDetails)
-        Receipt DoPayment();
+    IrctcInterface:
+        List<Train> SearchTrain(string from=null, string to=null, Date = null,int trainNo = 0, int trianName=string.empty);
+        Ticket BookTicket(Train,CoachType,int no.of.seats);   
+        Receipt CancelTicket(Ticket); //Receipt class we need to implement
+        Ticket ModifyTicket(Ticket oldTrainDetails,Train,CoachType,int no.of.seats..etc)
+        Receipt DoPayment(int rupees);
         TrainStatus getTrainStatus(TrainNo,trainName,Date);
 
     IrctcImpl implements IrctcInterface
