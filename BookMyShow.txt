@@ -1,0 +1,180 @@
+My thinking process while approaching Low level design.
+
+Eg: Book my show(BMS allows lot of features like movie booking, hosting events, event booking..etc)
+    For simplicity as of now, lets go with movie ticket booking only and extend other things later.
+
+I will approach step by step.
+
+Step 1: Problem statement.
+        Usually i think as prespective of a use cases and users flow in the system(Success & failure cases).
+        Then i will pick nouns and actions in the problem statement.nouns will be my classes & actions will be functions later.
+        
+        Use cases:  
+            User can search movies and theaters.
+            User can book movie ticket.
+            User can cancel/modify movie ticket.
+
+        User flow:
+            1.User will login to system. Users location is identified or user can select his desired location to browse.
+            2.Then searches for his movie or theaters.
+            3.In case if user searched a movie, system should provide theater list.(Order by location near by)
+            4.In case if user searched a theater, system should provide movie list in that theater.
+            5.User select any movie which is running in particular time(show) and navigate inside and chooses seat.
+            6.There is lot of seat types and user selects his desired seat type.
+            7.User chooses no.of.seats
+            8.User will be redirected to payment.
+            9.User makes payment and on successfull payment, ticket will be provided.
+            10.There are exceptions like Seat booked already(This might happen when making payment..etc)
+
+
+Step 2: Identify classes: (See problem statement and pick nouns and actions)
+        User
+        Movie
+        Ticket
+        Theater
+        Show
+        Seat
+        SeatTypes
+        Payment
+        Ticket
+        SeatBookedAlreadyException
+        TicketBookingApp
+
+Step 3: Identify Relationships between classes:
+
+
+         |--------------------Payment   
+         |                       |
+         -------------Ticket     |
+         |              |        |
+         |              |        |
+        User ------ TicketBookingApp
+                        |        |
+                        |        |   
+                        |        |   
+                        |        |   
+                    Theater------Movie------Show-----Seat
+
+
+Step 4: Identify properties inside a class:(Usally i will start with lower order and come top)
+        Eg: I will start with seat and approach top.
+
+
+        enum SeatType
+            GOLD
+            SILVER
+            BASIC
+
+        abstract Class Seat:
+            int row
+            int column
+            SeatType SeatType
+            int amount
+            Seat(int row,int col,SeatType seatType,int amount) //constructor
+        
+        Class GoldSeat : Seat
+            GoldSeat(int row,int col):Super(row,col,SeatType_Gold,250)
+
+        //Similarly we can create for silver class and basic class.
+
+        Class Show
+            int showId
+            string showName
+            List<Seat> seats    //We can also user better datastructures like hash map using seat type as key too.
+            Movie movie         //This is not tightly coupled. Its association is aggregate association.
+            DateTime showTime   
+
+        Class Movie
+            string movieName
+            list<casts> casts   //We can implement cast details later.
+            DateTime releaseDate
+            list<string> directors
+            list<string> musicdirectors
+            string language
+            int AgeRestriction  
+            MovieType movieType
+            ..etc
+        
+        MoiveType
+            U
+            UA 
+            A 
+
+        Class Theater
+            int theaterId
+            string theaterName
+            Address address
+            Location locationId
+            list<Show>          //We can have better data structure here. Like date as key , Movie details as key,..etc 
+            TheaterType theaterType 
+
+        TheaterType 
+            MULTIPLEX
+            NORMAL
+            AC 
+
+        Location
+            double latitude
+            double longitude
+        
+        class TicketBookingApp
+            List<Theater>       //we can have hashmaps for theater to movie.
+            List<Movie>         //we can have hashmaps for movie to theater too.
+
+        class Ticket 
+            string movieName
+            ShowTime showTime
+            List<Seat> seats
+            Theater theater
+            int ruppess
+
+        abstract class Payment 
+            int ruppess
+            PaymentType
+            
+            Payment(PaymentType paymentType)
+
+        class CreditCardPayment : Payment 
+            CreditCardPayment(List<int> CardNumber,int CVV,int amount): Super(PaymentType_CREDITCARD)
+
+        PaymentType 
+            CREDITCARD
+            NETBANKING
+            PHONEPE
+            BOOKMYSHOW_WALLET
+            COUPOUN
+
+Step 5 : Identify Functionalities:
+        
+        Interface TicketBookingAppInt:
+            
+            //Search feature:
+            List<Movie> getMovies(string movieName="", string actorName="" , string theaterName="",Location location=null,MovieType movieType=null);
+
+            List<Theater> getTheaters(string theaterName="",string movieName="",Location location=null,TheaterType theaterType);
+
+            //Booking 
+            Ticket BookTicket(Movie movie,List<Seat> seats,DateTime date);
+
+            bool InitiatePayment(int PaymentAmount,PaymentType paymentType);//Payment will be initiated & payment will be done by payment gateway in another class.
+
+            Reciept CancelMovie(Ticket ticket)
+
+            Ticket ModifyMovie(Ticket oldTicketDetail,Movie newMovie,List<Seat> newSeats,DateTime newDate);
+        
+        class TicketBookingAppImpl implements TicketBookingAppInt
+            //All above methods are implemented.
+
+            //Also, new private methods are introduced.
+
+        class Theater:
+            List<Movie> getMovies(string movieName="", string actorName="" , string theaterName="",Location location=null,MovieType movieType=null);
+
+            bool LockSeat(Movie movie,List<Seat> seats,DateTime date);
+    
+    Step 6: Check whether any design patterns can be applied.
+
+        Singleton design pattern can be applied to TicketBookingAppImpl
+    
+        Factory design pattern can be applied based on payment types.
+        
