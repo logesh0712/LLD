@@ -1,0 +1,207 @@
+1.Problem statement:(my understanding/thinking)
+    use case:
+        user board a lift and go to particular floor.
+
+   Flow:        
+        A person can land to any floor and can input whether to go top or down.
+        Lift system should process the best lift and signal the lift to that floor. That lift should be optimistic one(Non fully loaded lift which can reach that floor in short time)
+        Once lift system found the lift, it should display lift number to users floor so that user can go to respective lift to board.
+        Once lift arrives, user can board the lift and user should input his destination floor.
+        Now lift should check whether weight inside lift should not cross boundary limit.
+        In that case, give signal/alarm.
+        Once all cases met after few seconds, lift should close the door and start the bus.
+        Lift has list of floor numbers to stop.Based on the floor numbers lift should stop and do its routine process.
+
+2.Identify class:
+    LiftSystem
+	Lift
+	FloorPanel
+	
+	LiftStatus
+	LiftWeightStatus
+
+3.Identifying Relationship:
+	
+	Person -- FloorPanel -- LiftSystem
+	|				|	        |
+	|				|           |
+	------------Lift-------------
+
+4.Identify Properties & functions:
+
+    interface IUser
+    {
+        void setFloorInput(int floorNo);
+        bool OpenDoor();
+        bool CloseDoor();
+    }
+
+    interface ISystem
+    {
+        LiftStatus getLiftStatus();
+        LiftWeightStatus getWeightStatus();
+        void setFloorInput(int floorNo);
+        bool stopLift(); 
+        void setWeightLimit(int weightLimit);
+        List<int> getCurrentProcessingFloors();
+    }
+
+    class LiftImpl implements IUser,ISystem
+    {
+        private int liftNo;
+        private LiftStatus status;
+        private LiftWeightStatus weightStatus;
+        private int weightLimit;
+        List<int> floors;   //User's input floor & LiftSystem signals lift with particular floor. Those floor Numbers to travel are maintained here.
+
+        public Lift(int liftNo)
+        {
+            this.liftNo = liftNo;
+            this.status = LiftStatus.IDLE;
+            this.weightStatus = WeightStatus.EMPTY;
+        }
+
+        /*Implentation of interface methods will come here*/
+
+        /*getters and setters*/
+
+        public setWeightLimit(int weightLimit)
+        {
+            this.weightLimit = weightLimit;
+        }
+    }
+
+
+    enum LiftStatus
+    {
+        IDLE,
+        MOVING,
+        OUT_OF_ORDER
+    }
+
+    enum LiftWeightStatus
+    {
+        FULL,
+        EMPTY,
+        HAS_SPACE
+    }
+
+    interface ILiftFloor
+    {
+        List<Lift> getLift(int floorNo);
+    }
+
+    interface ILiftSystem
+    {
+        List<Lift> getLift(int floorNo);
+        void setLifts(List<Lift> lifts);
+        bool stopLift();
+    }
+
+    class LiftSystemImpl implements ILiftFloor, ILiftSystem 
+    {
+        private int liftSystemNo;
+
+        private List<ISystem> lifts;   //we can change this to optimistic data structure later like HashMaps...etc
+
+        public LiftSystem(String liftSystemNo)
+        {
+            this.liftSystemNo = liftSystemNo;
+        }
+
+        /*Implentation of interface methods will come here*/
+
+        /*getters and setters*/
+    }
+
+
+    interface IFloorPanel
+    {
+        List<Lift> getLifts(int floorNo);
+        void DisplayLifts(List<Lift>)
+    }
+
+    class FloorPanel implements IFloorPanel
+    {
+        private int floorNo;
+        private ILiftFloor liftSystemRef;
+        private DisplayUnit displayUnit;
+
+        public FloorPanel(int floorNo)
+        {
+            this.floorNo = floorNo;
+        }
+
+        public List<Lift> getLifts(int floorNo)
+        {
+            List<Lift> floors = liftSystemRef.getLift(floorNo);
+        }   
+
+        private void DisplayLifts(List<Lift> lifts)
+        {
+            displayUnit.printLiftNumbers(lifts);
+        }
+        /*getters and setters*/
+        
+    }
+
+
+
+
+5.Testing using SOLID principles & Driver classes:
+
+class LiftDriver
+{
+
+    public static void main()
+    {
+        //1.Initialization done.
+            ISystem lift1 = new Lift(1);
+            ISystem lift2 = new Lift(2);
+            lift1.setWeightLimit(1000);
+            lift2.setWeightLimit(1500);
+
+            List<Lift> lifts = new ArrayList<Lift>();
+            lifts.Add(lift1);
+            lifts.Add(lifts2);
+
+            int liftSystemNo = 1; //This can be building no or block no...etc 
+            ILiftSystem liftSystem = new LiftSystem(liftSystemNo);
+            liftSystem.setLifts(lifts);
+
+        //Assume a user is in first floor and need to go to 3rd floor.
+
+            IFloorPanel floorPanel = new FloorPanel(1);
+            floorPanel.getLift(3);
+
+
+    }
+}
+
+//SOLID principles
+1.Single Responsibility:
+    All classes deal with its own properties
+    But as a optimization, 
+        Lift system does some calculation to find optimistic lift for given floor number.
+        So this logic can be moved out into seperate class.
+        So based on customer needes, we can plug different stategies to find optimistic lift.
+2.Open for extension and closed for modification:
+    In case if we need to change something, instead of changing the class, we should extend the class.
+    Eg: in case if some property need to be added for Lift class, then we can extend Lift class to add those property.
+
+3.Liskov substitution:
+    our system matches Liskov substitution.
+
+4.Interface segregation:
+    For different functionality we should seperate into different interfaces.
+    Having two interfaces for Lift. i.e., IUser and ISystem is ex for it.
+
+5.Dependency Inversion:
+    We are not coupling classes with each other.
+    So we are good here.
+
+
+
+//Design patterns:
+    Lift System can be made Singleton
+    Also stategy design pattern can be used to have different strategy on lift calculation.
