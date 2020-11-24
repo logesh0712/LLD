@@ -155,7 +155,7 @@ class LiftDriver
 
     public static void main()
     {
-        //1.Initialization done.
+        //1.Initialization.
             ISystem lift1 = new Lift(1);
             ISystem lift2 = new Lift(2);
             lift1.setWeightLimit(1000);
@@ -168,13 +168,23 @@ class LiftDriver
             int liftSystemNo = 1; //This can be building no or block no...etc 
             ILiftSystem liftSystem = new LiftSystem(liftSystemNo);
             liftSystem.setLifts(lifts);
-
-        //Assume a user is in first floor and need to go to 3rd floor.
-
+            //Initialization of floor panel for first floor.
             IFloorPanel floorPanel = new FloorPanel(1);
-            floorPanel.getLift(3);
 
+        //2.User action
+        //Assume a user is in first floor and need to go to 3rd floor.
+            List<IUser> lifts = floorPanel.getLift(3);
 
+        //Lets assume user goes in any of the lift.
+            lifts.get(0).openDoor();
+        //User gets in.
+            lifts.get(0).CloseDoor();
+
+        //Gives input for 3rd floor.
+            lifts.get(0).setFloorInput(3);
+
+        //Once arrived,door opens or user can sigal to open door too.
+            lifts.get(0).openDoor();
     }
 }
 
